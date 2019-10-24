@@ -1,0 +1,21 @@
+{
+  "name": "emip3",
+  "version": "0.0.1",
+  "description": "javascript implementation of EmIP003",
+  "main": "index.js",
+  "scripts": {
+    "test": "jest"
+  },
+  "keywords": [
+    "encryption",
+    "decryption",
+    "cardano",
+    "emurgo"
+  ],
+  "author": "emurgo R&D",
+  "license": "MIT",
+  "dependencies": {},
+  "devDependencies": {
+    "jest": "^24.9.0"
+  }
+}
