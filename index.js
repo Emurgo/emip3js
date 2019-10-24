@@ -3,9 +3,8 @@
 // - Node's default crypto.pbkdf2 or pbkdf2 as additional dependency (official)
 // - Node's default chacha20-poly1305 or https://github.com/calvinmetcalf/chacha20poly1305 (non-official)
 
-const crypto = require('crypto');
-// TODO: remove this dependency (?)
-// var pbkdf2 = require('pbkdf2');
+const pbkdf2 = require("pbkdf2");
+const chacha = require('chacha');
 
 const PBKDF_ITERATIONS = 19162;
 const SALT_SIZE = 32;
@@ -17,7 +16,7 @@ const CIPHER = 'chacha20-poly1305';
 
 const promisifyPbkdf2 = (password, salt) => {
   return new Promise((resolve, reject) => {
-    crypto.pbkdf2(password, salt, PBKDF_ITERATIONS , KEY_SIZE, DIGEST, (err, key) => {
+    pbkdf2.pbkdf2(password, salt, PBKDF_ITERATIONS , KEY_SIZE, DIGEST, (err, key) => {
       if (err) return reject(err);
       resolve(key);
     })
@@ -40,10 +39,13 @@ const encryptWithPassword = async (
 
   // TODO: 'chacha20-poly1305' is only available in node v11.2.0+
   // consider replacing by https://github.com/calvinmetcalf/chacha20poly1305
-  const cipher = crypto.createCipheriv(CIPHER, key, nonce, {
-    authTagLength: TAG_SIZE,
-  });
-  cipher.setAAD(aad, { plaintextLength: dataHex.length });
+  // const cipher = crypto.createCipheriv(CIPHER, key, nonce, {
+  //   authTagLength: TAG_SIZE,
+  // });
+  const cipher = chacha.createCipher(key, nonce);
+
+  // cipher.setAAD(aad, { plaintextLength: dataHex.length });
+  cipher.setAAD(aad);
   const head = cipher.update(dataHex);
   const final = cipher.final();
   const tag = cipher.getAuthTag();
@@ -59,9 +61,12 @@ const decryptWithPassword = async (password, ciphertext) => {
   const aad = Buffer.from('', 'hex');
   const cipherdata = ciphertextBytes.slice(SALT_SIZE + NONCE_SIZE + TAG_SIZE);
   const key = await promisifyPbkdf2(password, salt.toString('hex'));
-  const decipher = crypto.createDecipheriv(CIPHER, key, nonce, {
-    authTagLength: TAG_SIZE,
-  });
+
+  // const decipher = crypto.createDecipheriv(CIPHER, key, nonce, {
+  //   authTagLength: TAG_SIZE,
+  // });
+  const decipher =  chacha.createDecipher(key, nonce);
+
   decipher.setAuthTag(tag); // tag must be buffer
   decipher.setAAD(aad); // aad must be buffer
   let decrypted = decipher.update(cipherdata);
