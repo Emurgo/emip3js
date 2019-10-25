@@ -24,18 +24,21 @@ const promisifyPbkdf2 = (password, salt) => {
 }
 
 const encryptWithPassword = async (
-  password,
+  passwordHex,
   saltHex,
   nonceHex,
   dataHex,
 ) => {
-  const key = await promisifyPbkdf2(password, saltHex);
+  // convert hex strings into byte arrays (buffers)
+  const password = Buffer.from(passwordHex, 'hex');
   const salt = Buffer.from(saltHex, 'hex');
   const nonce = Buffer.from(nonceHex, 'hex');
   const aad = Buffer.from('', 'hex');
 
   if (salt.length != SALT_SIZE) throw new Error('salt length must be 32 bytes');
   if (nonce.length != NONCE_SIZE) throw new Error('nonce length must be 12 bytes');
+
+  const key = await promisifyPbkdf2(password, salt);
 
   // TODO: 'chacha20-poly1305' is only available in node v11.2.0+
   // consider replacing by https://github.com/calvinmetcalf/chacha20poly1305
@@ -53,14 +56,15 @@ const encryptWithPassword = async (
   return ciphertext.toString('hex');
 }
 
-const decryptWithPassword = async (password, ciphertext) => {
-  const ciphertextBytes = Buffer.from(ciphertext, 'hex');
-  const salt = ciphertextBytes.slice(0, SALT_SIZE);
-  const nonce = ciphertextBytes.slice(SALT_SIZE, SALT_SIZE + NONCE_SIZE);
-  const tag = ciphertextBytes.slice(SALT_SIZE + NONCE_SIZE, SALT_SIZE + NONCE_SIZE + TAG_SIZE);
+const decryptWithPassword = async (passwordHex, ciphertextHex) => {
+  const password = Buffer.from(passwordHex, 'hex');
+  const ciphertext = Buffer.from(ciphertextHex, 'hex');
+  const salt = ciphertext.slice(0, SALT_SIZE);
+  const nonce = ciphertext.slice(SALT_SIZE, SALT_SIZE + NONCE_SIZE);
+  const tag = ciphertext.slice(SALT_SIZE + NONCE_SIZE, SALT_SIZE + NONCE_SIZE + TAG_SIZE);
+  const cipherdata = ciphertext.slice(SALT_SIZE + NONCE_SIZE + TAG_SIZE);
   const aad = Buffer.from('', 'hex');
-  const cipherdata = ciphertextBytes.slice(SALT_SIZE + NONCE_SIZE + TAG_SIZE);
-  const key = await promisifyPbkdf2(password, salt.toString('hex'));
+  const key = await promisifyPbkdf2(password, salt);
 
   // const decipher = crypto.createDecipheriv(CIPHER, key, nonce, {
   //   authTagLength: TAG_SIZE,
