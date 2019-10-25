@@ -1,7 +1,5 @@
 // TODO:
-// - Node's default Buffer or buffer-safe
-// - Node's default crypto.pbkdf2 or pbkdf2 as additional dependency (official)
-// - Node's default chacha20-poly1305 or https://github.com/calvinmetcalf/chacha20poly1305 (non-official)
+// - consider using buffer-safe
 
 const pbkdf2 = require("pbkdf2");
 const chacha = require('chacha');
@@ -33,6 +31,7 @@ const encryptWithPassword = async (
   const password = Buffer.from(passwordHex, 'hex');
   const salt = Buffer.from(saltHex, 'hex');
   const nonce = Buffer.from(nonceHex, 'hex');
+  const data = Buffer.from(dataHex, 'hex');
   const aad = Buffer.from('', 'hex');
 
   if (salt.length != SALT_SIZE) throw new Error('salt length must be 32 bytes');
@@ -40,16 +39,10 @@ const encryptWithPassword = async (
 
   const key = await promisifyPbkdf2(password, salt);
 
-  // TODO: 'chacha20-poly1305' is only available in node v11.2.0+
-  // consider replacing by https://github.com/calvinmetcalf/chacha20poly1305
-  // const cipher = crypto.createCipheriv(CIPHER, key, nonce, {
-  //   authTagLength: TAG_SIZE,
-  // });
   const cipher = chacha.createCipher(key, nonce);
+  cipher.setAAD(aad, { plaintextLength: data.length });
 
-  // cipher.setAAD(aad, { plaintextLength: dataHex.length });
-  cipher.setAAD(aad);
-  const head = cipher.update(dataHex);
+  const head = cipher.update(data);
   const final = cipher.final();
   const tag = cipher.getAuthTag();
   const ciphertext = Buffer.concat([salt, nonce, tag, head, final]);
@@ -64,17 +57,15 @@ const decryptWithPassword = async (passwordHex, ciphertextHex) => {
   const tag = ciphertext.slice(SALT_SIZE + NONCE_SIZE, SALT_SIZE + NONCE_SIZE + TAG_SIZE);
   const cipherdata = ciphertext.slice(SALT_SIZE + NONCE_SIZE + TAG_SIZE);
   const aad = Buffer.from('', 'hex');
+
   const key = await promisifyPbkdf2(password, salt);
 
-  // const decipher = crypto.createDecipheriv(CIPHER, key, nonce, {
-  //   authTagLength: TAG_SIZE,
-  // });
   const decipher =  chacha.createDecipher(key, nonce);
+  decipher.setAuthTag(tag);
+  decipher.setAAD(aad);
 
-  decipher.setAuthTag(tag); // tag must be buffer
-  decipher.setAAD(aad); // aad must be buffer
-  let decrypted = decipher.update(cipherdata);
-  decrypted += decipher.final();
+  let decrypted = decipher.update(cipherdata, 'ignored', 'hex');
+  decrypted += decipher.final('hex');
   return decrypted;
 }
 

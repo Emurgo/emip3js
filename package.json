@@ -15,8 +15,8 @@
   "author": "emurgo R&D",
   "license": "MIT",
   "dependencies": {
-    "pbkdf2": "^3.0.17",
-    "chacha": "git+https://github.com/calvinmetcalf/chacha20poly1305.git"
+    "chacha": "git+https://github.com/calvinmetcalf/chacha20poly1305.git",
+    "pbkdf2": "3.0.17"
   },
   "devDependencies": {
     "jest": "^24.9.0"
