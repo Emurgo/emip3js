@@ -13,7 +13,7 @@ const saltHex = '50515253c0c1c2c3c4c5c6c750515253c0c1c2c3c4c5c6c750515253c0c1c2c
 const nonceHex = '50515253c0c1c2c3c4c5c6c7'; // 12-byte hex string
 const dataHex = Buffer.from('some data to encrypt', 'utf8').toString('hex');
 
-const ciphertextHex = await encryptWithPassword(password, saltHex, nonceHex, dataHex);
+const ciphertextHex = await encryptWithPassword(passwordHex, saltHex, nonceHex, dataHex);
 ```
 
 ### Decryption
