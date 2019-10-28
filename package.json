@@ -4,7 +4,8 @@
   "description": "javascript implementation of EmIP-003 (encryption/decryption)",
   "main": "index.js",
   "scripts": {
-    "test": "jest"
+    "test": "jest",
+    "lint": "eslint ."
   },
   "keywords": [
     "encryption",
@@ -19,6 +20,7 @@
     "pbkdf2": "3.0.17"
   },
   "devDependencies": {
+    "eslint": "^6.6.0",
     "jest": "^24.9.0"
   },
   "repository": {

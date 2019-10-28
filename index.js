@@ -10,16 +10,15 @@ const KEY_SIZE = 32;
 const DIGEST = 'sha512';
 const NONCE_SIZE = 12;
 const TAG_SIZE = 16;
-const CIPHER = 'chacha20-poly1305';
 
 const promisifyPbkdf2 = (password, salt) => {
   return new Promise((resolve, reject) => {
     pbkdf2.pbkdf2(password, salt, PBKDF_ITERATIONS , KEY_SIZE, DIGEST, (err, key) => {
       if (err) return reject(err);
       resolve(key);
-    })
-  })
-}
+    });
+  });
+};
 
 const encryptWithPassword = async (
   passwordHex,
@@ -47,7 +46,7 @@ const encryptWithPassword = async (
   const tag = cipher.getAuthTag();
   const ciphertext = Buffer.concat([salt, nonce, tag, head, final]);
   return ciphertext.toString('hex');
-}
+};
 
 const decryptWithPassword = async (passwordHex, ciphertextHex) => {
   const password = Buffer.from(passwordHex, 'hex');
@@ -58,6 +57,10 @@ const decryptWithPassword = async (passwordHex, ciphertextHex) => {
   const cipherdata = ciphertext.slice(SALT_SIZE + NONCE_SIZE + TAG_SIZE);
   const aad = Buffer.from('', 'hex');
 
+  if (ciphertext.length <= SALT_SIZE + NONCE_SIZE + TAG_SIZE) {
+    throw new Error('not enough data to decrypt');
+  }
+
   const key = await promisifyPbkdf2(password, salt);
 
   const decipher =  chacha.createDecipher(key, nonce);
@@ -67,7 +70,7 @@ const decryptWithPassword = async (passwordHex, ciphertextHex) => {
   let decrypted = decipher.update(cipherdata, 'ignored', 'hex');
   decrypted += decipher.final('hex');
   return decrypted;
-}
+};
 
 exports.encryptWithPassword = encryptWithPassword;
 exports.decryptWithPassword = decryptWithPassword;
