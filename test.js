@@ -41,7 +41,7 @@ describe('invalid decryption', () => {
   it('should throw on invalid password', async () => {
     const ciphertext = await emip3.encryptWithPassword(passwordHex, saltHex, nonceHex, dataHex);
     const wrongPassword = 'wrongPassword';
-    const promise = emip3.decryptWithPassword(wrongPassword, saltHex, nonceHex, dataHex);
+    const promise = emip3.decryptWithPassword(wrongPassword, saltHex, nonceHex, ciphertext);
     await expect(promise).rejects.toThrow();
   });
 

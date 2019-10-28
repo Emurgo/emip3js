@@ -10,16 +10,15 @@ const KEY_SIZE = 32;
 const DIGEST = 'sha512';
 const NONCE_SIZE = 12;
 const TAG_SIZE = 16;
-const CIPHER = 'chacha20-poly1305';
 
 const promisifyPbkdf2 = (password, salt) => {
   return new Promise((resolve, reject) => {
     pbkdf2.pbkdf2(password, salt, PBKDF_ITERATIONS , KEY_SIZE, DIGEST, (err, key) => {
       if (err) return reject(err);
       resolve(key);
-    })
-  })
-}
+    });
+  });
+};
 
 const encryptWithPassword = async (
   passwordHex,
@@ -47,7 +46,7 @@ const encryptWithPassword = async (
   const tag = cipher.getAuthTag();
   const ciphertext = Buffer.concat([salt, nonce, tag, head, final]);
   return ciphertext.toString('hex');
-}
+};
 
 const decryptWithPassword = async (passwordHex, ciphertextHex) => {
   const password = Buffer.from(passwordHex, 'hex');
@@ -71,7 +70,7 @@ const decryptWithPassword = async (passwordHex, ciphertextHex) => {
   let decrypted = decipher.update(cipherdata, 'ignored', 'hex');
   decrypted += decipher.final('hex');
   return decrypted;
-}
+};
 
 exports.encryptWithPassword = encryptWithPassword;
 exports.decryptWithPassword = decryptWithPassword;
