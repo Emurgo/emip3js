@@ -58,6 +58,10 @@ const decryptWithPassword = async (passwordHex, ciphertextHex) => {
   const cipherdata = ciphertext.slice(SALT_SIZE + NONCE_SIZE + TAG_SIZE);
   const aad = Buffer.from('', 'hex');
 
+  if (ciphertext.length <= SALT_SIZE + NONCE_SIZE + TAG_SIZE) {
+    throw new Error('not enough data to decrypt');
+  }
+
   const key = await promisifyPbkdf2(password, salt);
 
   const decipher =  chacha.createDecipher(key, nonce);
