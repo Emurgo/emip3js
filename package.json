@@ -1,5 +1,5 @@
 {
-  "name": "@emurgo/emip3js",
+  "name": "emip3js",
   "version": "0.0.1",
   "description": "javascript implementation of EmIP-003 (encryption/decryption)",
   "main": "index.js",
@@ -25,9 +25,6 @@
   },
   "repository": {
     "type": "git",
-    "url": "git://github.com/Emurgo/emip3js.git"
-  },
-  "publishConfig": {
-    "registry": "https://npm.pkg.github.com/"
+    "url": "git+https://github.com/Emurgo/emip3js.git"
   }
 }
