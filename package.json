@@ -20,7 +20,7 @@
     "pbkdf2": "3.0.17"
   },
   "devDependencies": {
-    "eslint": "^6.6.0",
+    "eslint": "^7.12.1",
     "jest": "^24.9.0"
   },
   "repository": {
