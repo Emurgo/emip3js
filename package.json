@@ -17,7 +17,7 @@
   "license": "MIT",
   "dependencies": {
     "chacha": "git+https://github.com/calvinmetcalf/chacha20poly1305.git",
-    "pbkdf2": "3.1.1"
+    "pbkdf2": "3.1.2"
   },
   "devDependencies": {
     "eslint": "^7.15.0",
